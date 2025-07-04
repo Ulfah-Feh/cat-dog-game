@@ -3,91 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cat vs Dog Game</title>
+  <title>Cat Chases Dog</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background: #fcefee;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      background: #fef6e4;
       overflow: hidden;
     }
     canvas {
-      background: #fff;
-      border: 4px solid #333;
-      border-radius: 10px;
-    }
-    h1 {
-      position: absolute;
-      top: 20px;
-      color: #333;
-      text-shadow: 1px 1px 0 #fff;
+      display: block;
+      margin: 0 auto;
+      background: #f3d2c1;
+      border: 6px solid #f582ae;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <h1>🐱 Cat vs Dog 🐶</h1>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <canvas id="gameCanvas" width="500" height="300"></canvas>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const player = { x: 180, y: 180, size: 20, speed: 20 };
-    const goal = { x: 60, y: 60, size: 20 };
-    let score = 0;
+    const cat = { x: 50, y: 50, size: 30, color: '#ff8fab' };
+    const dog = { x: 400, y: 200, size: 30, color: '#a3c4f3' };
 
-    function drawRect(obj, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(obj.x, obj.y, obj.size, obj.size);
+    function drawCharacter(obj, emoji) {
+      ctx.font = obj.size + "px Arial";
+      ctx.fillText(emoji, obj.x, obj.y);
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawRect(goal, "#ffcc00"); // bone
-      drawRect(player, "#ff69b4"); // cat
-      ctx.fillStyle = "#333";
-      ctx.fillText("Score: " + score, 10, 390);
+      drawCharacter(cat, "🐱");
+      drawCharacter(dog, "🐶");
     }
 
-    function randomPosition() {
-      const pos = [0, 60, 120, 180, 240, 300, 360];
-      return pos[Math.floor(Math.random() * pos.length)];
-    }
+    function update() {
+      // Move dog randomly
+      const dx = Math.random() * 2 - 1;
+      const dy = Math.random() * 2 - 1;
+      dog.x += dx * 1.5;
+      dog.y += dy * 1.5;
 
-    function movePlayer(e) {
-      switch (e.key) {
-        case "ArrowUp":
-          player.y = Math.max(0, player.y - player.speed);
-          break;
-        case "ArrowDown":
-          player.y = Math.min(canvas.height - player.size, player.y + player.speed);
-          break;
-        case "ArrowLeft":
-          player.x = Math.max(0, player.x - player.speed);
-          break;
-        case "ArrowRight":
-          player.x = Math.min(canvas.width - player.size, player.x + player.speed);
-          break;
-      }
-      if (
-        player.x < goal.x + goal.size &&
-        player.x + player.size > goal.x &&
-        player.y < goal.y + goal.size &&
-        player.y + player.size > goal.y
-      ) {
-        score++;
-        goal.x = randomPosition();
-        goal.y = randomPosition();
-      }
+      // Cat chases dog
+      const diffX = dog.x - cat.x;
+      const diffY = dog.y - cat.y;
+      const length = Math.sqrt(diffX * diffX + diffY * diffY);
+      const speed = 1.8;
+
+      cat.x += (diffX / length) * speed;
+      cat.y += (diffY / length) * speed;
+
+      // Boundaries
+      dog.x = Math.max(0, Math.min(canvas.width - 30, dog.x));
+      dog.y = Math.max(30, Math.min(canvas.height, dog.y));
+      cat.x = Math.max(0, Math.min(canvas.width - 30, cat.x));
+      cat.y = Math.max(30, Math.min(canvas.height, cat.y));
+
       draw();
     }
 
+    function loop() {
+      update();
+      requestAnimationFrame(loop);
+    }
+
     draw();
-    window.addEventListener("keydown", movePlayer);
+    loop();
   </script>
 </body>
 </html>
